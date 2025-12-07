@@ -3,7 +3,7 @@ project(rtabmap_demos)
 
 find_package(ament_cmake REQUIRED)
 
-install(DIRECTORY launch config params data
+install(DIRECTORY launch config params data models
    DESTINATION share/${PROJECT_NAME}
 )
 
