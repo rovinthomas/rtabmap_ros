@@ -36,12 +36,12 @@ def launch_setup(context, *args, **kwargs):
         os.environ['TURTLEBOT3_MODEL'] = 'waffle'
 
     # Set GAZEBO_MODEL_PATH to locally modified model
-    local_models_dir = os.path.join(get_package_share_directory('rtabmap_demos'), 'models')
-    old_models = os.environ.get('GAZEBO_MODEL_PATH', '')
-    models_list = [p for p in old_models.split(':') if p] if old_models else []
-    models_list.insert(0, local_models_dir)
-    os.environ['GAZEBO_MODEL_PATH'] = ":".join(models_list)
-    print('GAZEBO_MODEL_PATH:', os.environ.get('GAZEBO_MODEL_PATH')) #remove
+    # local_models_dir = os.path.join(get_package_share_directory('rtabmap_demos'), 'models')
+    # old_models = os.environ.get('GAZEBO_MODEL_PATH', '')
+    # models_list = [p for p in old_models.split(':') if p] if old_models else []
+    # models_list.insert(0, local_models_dir)
+    # os.environ['GAZEBO_MODEL_PATH'] = ":".join(models_list)
+    # print('GAZEBO_MODEL_PATH:', os.environ.get('GAZEBO_MODEL_PATH')) #remove
 
     # Directories
     pkg_turtlebot3_gazebo = get_package_share_directory(
