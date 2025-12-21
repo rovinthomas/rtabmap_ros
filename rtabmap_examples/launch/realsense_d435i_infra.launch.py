@@ -13,21 +13,28 @@ from launch_ros.actions import Node, SetParameter
 from launch.actions import IncludeLaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
 
 def generate_launch_description():
     parameters=[{
-          'frame_id':'camera_link',
+          'frame_id':LaunchConfiguration('frame_id'),
           'subscribe_depth':True,
           'subscribe_odom_info':True,
           'approx_sync':False,
-          'wait_imu_to_init':True}]
+          'wait_imu_to_init':True,
+          'database_path': LaunchConfiguration('database_path')}]
+    
+    camera_name = LaunchConfiguration('camera_name')
+
+    rgb_image = PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='infra1/image_rect_raw')])
+    rgb_info = PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='infra1/camera_info')])
+    depth_image = PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='depth/image_rect_raw')])
 
     remappings=[
           ('imu', '/imu/data'),
-          ('rgb/image', '/camera/infra1/image_rect_raw'),
-          ('rgb/camera_info', '/camera/infra1/camera_info'),
-          ('depth/image', '/camera/depth/image_rect_raw')]
+          ('rgb/image', rgb_image),
+          ('rgb/camera_info', rgb_info),
+          ('depth/image', depth_image)]
 
     return LaunchDescription([
 
@@ -44,6 +51,22 @@ def generate_launch_description():
             'odom_args', default_value='',
             description='Extra arguments just for odometry node. If the same argument is already set in \"args\", it will be overwritten by the one in \"odom_args\".'),
 
+        DeclareLaunchArgument(
+            'database_path', default_value='~/.ros/rtabmap.db',
+            description='Where is the map saved/loaded.'),
+        
+        DeclareLaunchArgument(
+            'frame_id', default_value='camera_link',
+            description='Robot base frame used by RTAB-Map (must exist in TF).'),
+
+        DeclareLaunchArgument(
+            'publish_tf', default_value='true',
+            description='Whether the RealSense driver should publish the internal camera TF frames'),
+
+        DeclareLaunchArgument(
+            'camera_name', default_value='camera',
+            description='Camera namespace to prefix all camera topic names'),
+
         #Hack to disable IR emitter
         SetParameter(name='depth_module.emitter_enabled', value=0),
 
@@ -53,12 +76,14 @@ def generate_launch_description():
                 get_package_share_directory('realsense2_camera'), 'launch'),
                 '/rs_launch.py']),
                 launch_arguments={'camera_namespace': '',
+                                  'camera_name': LaunchConfiguration('camera_name'),
                                   'enable_gyro': 'true',
                                   'enable_accel': 'true',
                                   'unite_imu_method': LaunchConfiguration('unite_imu_method'),
                                   'enable_infra1': 'true',
                                   'enable_infra2': 'true',
-                                  'enable_sync': 'true'}.items(),
+                                  'enable_sync': 'true',
+                                  'publish_tf': LaunchConfiguration('publish_tf')}.items(),
         ),
 
         Node(
@@ -71,7 +96,7 @@ def generate_launch_description():
             package='rtabmap_slam', executable='rtabmap', output='screen',
             parameters=parameters,
             remappings=remappings,
-            arguments=['-d', LaunchConfiguration("args")]),
+            arguments=[LaunchConfiguration("args")]),
 
         Node(
             package='rtabmap_viz', executable='rtabmap_viz', output='screen',
@@ -84,5 +109,5 @@ def generate_launch_description():
             parameters=[{'use_mag': False, 
                          'world_frame':'enu', 
                          'publish_tf':False}],
-            remappings=[('imu/data_raw', '/camera/imu')]),
+            remappings=[('imu/data_raw', PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='imu')]))]),
     ])
