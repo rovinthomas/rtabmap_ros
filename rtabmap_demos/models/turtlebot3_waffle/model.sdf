@@ -366,8 +366,16 @@
     </link>
 
     <link name="camera_link"/>
-
     <link name="camera_rgb_frame"/>
+
+    <joint name="camera_rgb_optical_joint" type="fixed">
+      <parent>camera_rgb_frame</parent>
+      <child>camera_rgb_optical_frame</child>
+      <pose>0 0 0 -1.57079632679 0 -1.57079632679</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+      </axis>
+    </joint> 
 
     <link name="camera_rgb_optical_frame">
       <inertial>
@@ -486,15 +494,6 @@
       <parent>camera_link</parent>
       <child>camera_rgb_frame</child>
       <pose>0.005 0.018 0.013 0 0 0</pose>
-      <axis>
-        <xyz>0 0 1</xyz>
-      </axis>
-    </joint>
-
-    <joint name="camera_rgb_optical_joint" type="fixed">
-      <parent>camera_rgb_frame</parent>
-      <child>camera_rgb_optical_frame</child>
-      <pose>0 0 0 -1.57079632679 0 -1.57079632679</pose>
       <axis>
         <xyz>0 0 1</xyz>
       </axis>
