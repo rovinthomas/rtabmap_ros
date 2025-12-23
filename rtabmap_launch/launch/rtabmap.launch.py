@@ -323,7 +323,8 @@ def launch_setup(context, *args, **kwargs):
                 "landmark_linear_variance": LaunchConfiguration('tag_linear_variance'),
                 "landmark_angular_variance": LaunchConfiguration('tag_angular_variance'),
                 "Mem/IncrementalMemory": ConditionalText("true", "false", IfCondition(PythonExpression(["'", LaunchConfiguration('localization'), "' != 'true'"]))._predicate_func(context)).perform(context),
-                "Mem/InitWMWithAllNodes": ConditionalText("true", "false", IfCondition(PythonExpression(["'", LaunchConfiguration('localization'), "' == 'true'"]))._predicate_func(context)).perform(context)
+                "Mem/InitWMWithAllNodes": ConditionalText("true", "false", IfCondition(PythonExpression(["'", LaunchConfiguration('localization'), "' == 'true'"]))._predicate_func(context)).perform(context),
+                "Mem/RotateImagesUpsideUp": "true"
             }],
             remappings=[
                 ("map", LaunchConfiguration('map_topic')),
@@ -373,7 +374,8 @@ def launch_setup(context, *args, **kwargs):
                 "qos_odom": LaunchConfiguration('qos_odom'),
                 "qos_camera_info": LaunchConfiguration('qos_camera_info'),
                 "qos_user_data": LaunchConfiguration('qos_user_data'),
-                "odometry_node_name": rtabmap_viz_odometry_node_name
+                "odometry_node_name": rtabmap_viz_odometry_node_name,
+                "Mem/RotateImagesUpsideUp": "true"
             }],
             remappings=[
                 ("rgb/image", LaunchConfiguration('rgb_topic_relay')),
