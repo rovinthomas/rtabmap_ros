@@ -10,11 +10,11 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch_ros.actions import Node, SetParameter
-from launch.actions import IncludeLaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
-
+from launch.conditions import UnlessCondition
+    
 def generate_launch_description():
     parameters=[{
           'frame_id':LaunchConfiguration('frame_id'),
@@ -39,6 +39,10 @@ def generate_launch_description():
     return LaunchDescription([
 
         # Launch arguments
+        DeclareLaunchArgument(
+            'bag', default_value=TextSubstitution(text = 'false'),
+            description='Use bag file as input instead of live camera'),
+
         DeclareLaunchArgument(
             'unite_imu_method', default_value='2',
             description='0-None, 1-copy, 2-linear_interpolation. Use unite_imu_method:="1" if imu topics stop being published.'),
@@ -75,15 +79,16 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('realsense2_camera'), 'launch'),
                 '/rs_launch.py']),
-                launch_arguments={'camera_namespace': '',
-                                  'camera_name': LaunchConfiguration('camera_name'),
-                                  'enable_gyro': 'true',
-                                  'enable_accel': 'true',
-                                  'unite_imu_method': LaunchConfiguration('unite_imu_method'),
-                                  'enable_infra1': 'true',
-                                  'enable_infra2': 'true',
-                                  'enable_sync': 'true',
-                                  'publish_tf': LaunchConfiguration('publish_tf')}.items(),
+            condition = UnlessCondition(LaunchConfiguration("bag")),
+            launch_arguments={'camera_namespace': '',
+                            'camera_name': LaunchConfiguration('camera_name'),
+                            'enable_gyro': 'true',
+                            'enable_accel': 'true',
+                            'unite_imu_method': LaunchConfiguration('unite_imu_method'),
+                            'enable_infra1': 'true',
+                            'enable_infra2': 'true',
+                            'enable_sync': 'true',
+                            'publish_tf': LaunchConfiguration('publish_tf')}.items(),
         ),
 
         Node(
