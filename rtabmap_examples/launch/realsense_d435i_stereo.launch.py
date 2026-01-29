@@ -56,7 +56,7 @@ def generate_launch_description():
 
         # Launch arguments
         DeclareLaunchArgument(
-            'bag', default_value=TextSubstitution(text = 'false'),
+            'use_bag', default_value=TextSubstitution(text = 'false'),
             description='Use bag file as input instead of live camera'),
 
         DeclareLaunchArgument(
@@ -95,7 +95,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('realsense2_camera'), 'launch'),
                 '/rs_launch.py']),
-            condition = UnlessCondition(LaunchConfiguration("bag")),
+            condition = UnlessCondition(LaunchConfiguration("use_bag")),
             launch_arguments={'camera_namespace': '',
                             'camera_name': LaunchConfiguration('camera_name'),
                             'enable_gyro': 'true',
