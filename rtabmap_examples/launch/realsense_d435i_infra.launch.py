@@ -13,7 +13,7 @@ from launch_ros.actions import Node, SetParameter
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
-from launch.conditions import UnlessCondition
+from launch.conditions import IfCondition, UnlessCondition
     
 def generate_launch_description():
     parameters=[{
@@ -71,6 +71,10 @@ def generate_launch_description():
             'camera_name', default_value='camera',
             description='Camera namespace to prefix all camera topic names'),
 
+        DeclareLaunchArgument(
+            'rtabmap_viz', default_value='true',
+            description='Launch rtabmap_viz GUI'),
+
         #Hack to disable IR emitter
         SetParameter(name='depth_module.emitter_enabled', value=0),
 
@@ -106,7 +110,8 @@ def generate_launch_description():
         Node(
             package='rtabmap_viz', executable='rtabmap_viz', output='screen',
             parameters=parameters,
-            remappings=remappings),
+            remappings=remappings,
+            condition=IfCondition(LaunchConfiguration("rtabmap_viz"))),
                 
         # Compute quaternion of the IMU
         Node(
