@@ -24,9 +24,10 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch_ros.actions import Node, SetParameter
+from launch_ros.parameter_descriptions import ParameterValue
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution, PythonExpression
 from launch.conditions import IfCondition, UnlessCondition
 
 def generate_launch_description():
@@ -35,7 +36,13 @@ def generate_launch_description():
           'subscribe_stereo':True,
           'subscribe_odom_info':True,
           'wait_imu_to_init':True,
-          'database_path': LaunchConfiguration('database_path')} # can be added to rtabmap node's parameters only
+          'database_path':LaunchConfiguration('database_path'),
+          'Mem/InitWMWithAllNodes':ParameterValue(
+              PythonExpression(['"', LaunchConfiguration("localization"), '".lower() == "true"']),
+              value_type=str),
+          'Mem/IncrementalMemory':ParameterValue(
+              PythonExpression(['"', LaunchConfiguration("localization"), '".lower() != "true"']),
+              value_type=str)}
 
     camera_name = LaunchConfiguration('camera_name')
 
@@ -58,6 +65,10 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_bag', default_value=TextSubstitution(text = 'false'),
             description='Use bag file as input instead of live camera'),
+
+        DeclareLaunchArgument(
+            'localization', default_value=TextSubstitution(text = 'false'),
+            description = "Run RTAB-Map in localization mode (map is not updated, only used for localization)"),
 
         DeclareLaunchArgument(
             'unite_imu_method', default_value='2',
