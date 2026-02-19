@@ -23,13 +23,23 @@ def generate_launch_description():
           'subscribe_odom_info':True,
           'approx_sync':False,
           'wait_imu_to_init':True,
+          'use_sim_time':LaunchConfiguration('use_bag'),
           'database_path': LaunchConfiguration('database_path'),
           'Mem/InitWMWithAllNodes':ParameterValue(
               PythonExpression(['"', LaunchConfiguration("localization"), '".lower() == "true"']),
               value_type=str),
           'Mem/IncrementalMemory':ParameterValue(
               PythonExpression(['"', LaunchConfiguration("localization"), '".lower() != "true"']),
-              value_type=str)}]
+              value_type=str),
+          'Reg/Force3DoF':'true',               # z, pitch and roll of pose are set to 0 (flat ground)
+          'Grid/3D':'false',                    # Use 2D occupancy
+          'Grid/RayTracing':'true',             # Fill empty space
+          'Grid/NormalsSegmentation':'false',   # Use passthrough filter to detect obstacles (flat ground)
+          'Grid/MaxGroundHeight':'0.05',        # All points above 0.05 m are obstacles
+          'Grid/MaxObstacleHeight':'1.0',       # All points above 1 m are ignored
+          'Grid/RangeMax':'5',                  # All points beyond 5 m are ignored
+          'Odom/ResetCountdown':'10'            # Auto-reset odometry after 10 lost frames
+    }]
     
     camera_name = LaunchConfiguration('camera_name')
 
@@ -131,4 +141,32 @@ def generate_launch_description():
                          'world_frame':'enu', 
                          'publish_tf':False}],
             remappings=[('imu/data_raw', PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='imu')]))]),
+
+        # Obstacle detection with the camera for nav2 local costmap.
+        # First, we need to convert depth image to a point cloud.
+        # Second, we segment the floor from the obstacles.
+        Node(
+            package='rtabmap_util', executable='point_cloud_xyz', output='screen',
+            parameters=[{'decimation': 2,
+                         'max_depth': 3.0,
+                         'voxel_size': 0.02}],
+            remappings=[('depth/image', PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='aligned_depth_to_color/image_raw')])),
+                        # Image, input # if doesnt, work, try /gravikart_camera/depth/image_raw, also try image_rect_raw instead of image_raw
+
+                        ('depth/camera_info', PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='aligned_depth_to_color/camera_info')])),
+                        # CameraInfo, input # if doesnt, work, try /gravikart_camera/depth/camera_info
+
+                        ('cloud', PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='cloud')]))]),
+                        # PointCloud2, output
+        Node(
+            package='rtabmap_util', executable='obstacles_detection', output='screen',
+            parameters=parameters,
+            remappings=[('cloud', PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='cloud')])),
+                        # PointCloud2, input
+
+                        ('obstacles', PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='obstacles')])),
+                        # PointCloud2, output
+
+                        ('ground', PathJoinSubstitution([TextSubstitution(text='/'), camera_name, TextSubstitution(text='ground')]))]),
+                        # PointCloud2, output
     ])
