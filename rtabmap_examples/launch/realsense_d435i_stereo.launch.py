@@ -52,7 +52,19 @@ def generate_launch_description():
           'Grid/MaxGroundHeight':'0.05',        # All points above 0.05 m are obstacles
           'Grid/MaxObstacleHeight':'1.0',       # All points above 1 m are ignored
           'Grid/RangeMax':'5',                  # All points beyond 5 m are ignored
-          'Odom/ResetCountdown':'10'            # Auto-reset odometry after 10 lost frames
+          'Odom/ResetCountdown':'10',           # Auto-reset odometry after 10 lost frames
+
+          # GPU optimizations (requires CUDA and compatible graphcis card)
+          'SURF/GpuVersion':'true',             # Use GPU version of SURF feature detector (requires CUDA)
+          'FAST/Gpu':'true',                    # Use GPU version of FAST feature detector (requires CUDA)
+          'GFTT/Gpu':'true',                    # Use GPU version of GFTT feature detector (requires CUDA)
+          'ORB/Gpu':'true',                     # Use GPU version of ORB feature detector (requires CUDA)
+          'SIFT/Gpu':'true',                    # Use GPU version of SIFT feature detector (requires CUDA)
+          'SuperPoint/Cuda':'true',             # Use CUDA for SuperPoint feature detector (requires Torch with CUDA)
+          'SuperPointRpautrat/Cuda':'true',     # Use CUDA for SuperPoint-Rpautrat feature detector (requires Torch with CUDA)
+          'PyDetector/Cuda':'true',             # Use CUDA for custom Python feature detector
+          'Vis/CorFlowGpu':'true',              # Use GPU for optical flow correspondence computation (requires CUDA)
+          'Stereo/Gpu':'true'                   # Use GPU for stereo matching (requires CUDA)
     }
 
     camera_name = LaunchConfiguration('camera_name')
