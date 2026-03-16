@@ -138,6 +138,7 @@ def generate_launch_description():
                             'enable_gyro': 'true',
                             'enable_accel': 'true',
                             'unite_imu_method': LaunchConfiguration('unite_imu_method'),
+                            'align_depth.enable': 'true',
                             'enable_infra1': 'true',
                             'enable_infra2': 'true',
                             'enable_sync': 'true',
